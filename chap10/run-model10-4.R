@@ -1,17 +1,17 @@
 library(rstan)
-rstan_options(auto_write=TRUE)
-options(mc.cores=parallel::detectCores())
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
 
-d <- read.csv(file='input/data-shogi-player.txt')
+d <- read.csv(file = 'input/data-shogi-player.txt')
 N <- max(d)
 G <- nrow(d)
-data <- list(N=N, G=G, LW=d)
+data <- list(N = N, G = G, LW = d)
 
-stanmodel <- stan_model(file='model/model10-4.stan')
-fit <- sampling(stanmodel, data=data, pars=c('mu','s_mu','s_pf'), seed=1234)
+stanmodel <- stan_model(file = 'model/model10-4.stan')
+fit <- sampling(stanmodel, data = data, pars = c('mu', 's_mu', 's_pf'), seed = 1234)
 
 ms <- rstan::extract(fit)
-d_qua <- data.frame(nid=1:N, t(apply(ms$mu, 2, quantile, prob=c(0.05, 0.5, 0.95))))
+d_qua <- data.frame(nid = 1:N, t(apply(ms$mu, 2, quantile, prob = c(0.05, 0.5, 0.95))))
 colnames(d_qua) <- c('nid', 'p05', 'p50', 'p90')
 d_top5 <- head(d_qua[rev(order(d_qua$p50)),], 5)
 #     nid    p05   p50   p90
@@ -22,7 +22,7 @@ d_top5 <- head(d_qua[rev(order(d_qua$p50)),], 5)
 # 65   65 0.9916 1.282 1.580
 
 
-d_qua <- data.frame(nid=1:N, t(apply(ms$s_pf, 2, quantile, prob=c(0.05, 0.5, 0.95))))
+d_qua <- data.frame(nid = 1:N, t(apply(ms$s_pf, 2, quantile, prob = c(0.05, 0.5, 0.95))))
 colnames(d_qua) <- c('nid', 'p05', 'p50', 'p90')
 d_top3 <- head(d_qua[rev(order(d_qua$p50)),], 3)
 d_bot3 <- head(d_qua[order(d_qua$p50),], 3)
